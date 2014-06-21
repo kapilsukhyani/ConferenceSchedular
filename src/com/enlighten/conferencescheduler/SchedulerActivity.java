@@ -37,6 +37,9 @@ public class SchedulerActivity extends ListActivity implements OnClickListener {
 	private Button addTalkButton, scheduleTalksButton;
 	private List<Talk> addedTalks = new ArrayList<Talk>();
 
+	/**
+	 * Loads default track rules in background and notifies on main thread
+	 */
 	private AsyncTask<Void, Void, TrackRule> defaultTrackRuleLoader = new AsyncTask<Void, Void, TrackRule>() {
 		ProgressDialog dialog;
 
@@ -112,6 +115,10 @@ public class SchedulerActivity extends ListActivity implements OnClickListener {
 		};
 	};
 
+	/**
+	 * Schedules talks in background and then opens a new screen to show
+	 * scheduled conference
+	 */
 	private AsyncTask<Void, Void, Conference> schedularTask = new AsyncTask<Void, Void, Conference>() {
 		ProgressDialog dialog;
 
@@ -178,6 +185,9 @@ public class SchedulerActivity extends ListActivity implements OnClickListener {
 		}
 	}
 
+	/**
+	 * Starts scheduling
+	 */
 	private void scheduleTalks() {
 		if (null != trackRule) {
 			schedularTask.execute((Void) null);

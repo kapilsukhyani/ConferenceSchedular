@@ -8,5 +8,6 @@ public class Constants {
 	}
 
 	public static final int LIGHTNING_TO_MINUTE_MULTIPLIER = 5;
+	public static final int HOUR_TO_MIN_MULTIPLIER = 60;
 
 }
