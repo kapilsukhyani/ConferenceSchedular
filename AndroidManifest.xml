@@ -14,7 +14,7 @@
         android:label="@string/app_name"
          >
         <activity
-            android:name="com.enlighten.conferenceschedular.MainActivity"
+            android:name="com.enlighten.conferencescheduler.SchedulerActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

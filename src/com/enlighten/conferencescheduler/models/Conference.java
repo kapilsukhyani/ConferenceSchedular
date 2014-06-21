@@ -1,4 +1,4 @@
-package com.enlighten.conferenceschedular.models;
+package com.enlighten.conferencescheduler.models;
 
 import java.util.List;
 

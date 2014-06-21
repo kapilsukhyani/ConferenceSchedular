@@ -5,4 +5,22 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
 
+    <!-- Common -->
+    <string name="wait_tile">Please Wait....</string>
+    <string name="ok">OK</string>
+
+    <!-- Scheduler Activity -->
+    <string name="track_rule_loading">Loading default track rules</string>
+    <string name="track_rule_parsing_error_message">Something went wrong while parsing track_rule json file in raw resource</string>
+    <string name="talk_title_hint">Talk title. e.g. Java introduction</string>
+    <string name="talk_duration_hint">Talk duration. e.g. 60 Min</string>
+    <string name="unit">Unit</string>
+    <string name="add_talk">Add Talk</string>
+    <string name="schedule_talk">Schedule Talks</string>
+
+    <string-array name="units">
+        <item>Min</item>
+        <item>Lig</item>
+    </string-array>
+
 </resources>
