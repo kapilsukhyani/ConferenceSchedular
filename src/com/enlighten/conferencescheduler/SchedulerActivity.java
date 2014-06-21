@@ -119,7 +119,8 @@ public class SchedulerActivity extends ListActivity implements OnClickListener {
 	 * Schedules talks in background and then opens a new screen to show
 	 * scheduled conference
 	 */
-	private AsyncTask<Void, Void, Conference> schedularTask = new AsyncTask<Void, Void, Conference>() {
+	private class SchedulerTask extends AsyncTask<Void, Void, Conference> {
+
 		ProgressDialog dialog;
 
 		protected void onPreExecute() {
@@ -129,19 +130,22 @@ public class SchedulerActivity extends ListActivity implements OnClickListener {
 
 		protected void onPostExecute(Conference result) {
 			dialog.dismiss();
+
+			System.out.println("result " + result.toString());
 		};
 
 		@Override
 		protected Conference doInBackground(Void... params) {
 
-			SchedulerFactory
+			Conference conference = SchedulerFactory
 					.getFactory()
 					.getScheduler(SchedulerType.CombinationScheduler, trackRule)
 					.scheduleTalks(addedTalks);
-			return null;
+
+			return conference;
 		}
 
-	};
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -190,7 +194,12 @@ public class SchedulerActivity extends ListActivity implements OnClickListener {
 	 */
 	private void scheduleTalks() {
 		if (null != trackRule) {
-			schedularTask.execute((Void) null);
+			if (addedTalks.isEmpty()) {
+				Utils.showSingleButtonAutoDissmissAlert("No talk is added yet",
+						getString(R.string.ok), SchedulerActivity.this);
+			} else {
+				new SchedulerTask().execute((Void) null);
+			}
 		} else {
 			Utils.showSingleButtonAutoDissmissAlert(
 					"Track rules has not been initialized, can not schedule talks",
@@ -231,6 +240,7 @@ public class SchedulerActivity extends ListActivity implements OnClickListener {
 				addedTalks.add(talk);
 				((TalkListAdapter) getListView().getAdapter())
 						.notifyDataSetChanged();
+				resetTalkParamViews();
 
 			} catch (NumberFormatException e) {
 				e.printStackTrace();
@@ -242,6 +252,11 @@ public class SchedulerActivity extends ListActivity implements OnClickListener {
 
 		}
 
+	}
+
+	private void resetTalkParamViews() {
+		talkDurationText.setText("");
+		talkTitleText.setText("");
 	}
 
 	/**
@@ -277,6 +292,12 @@ public class SchedulerActivity extends ListActivity implements OnClickListener {
 			if (convertView == null) {
 				convertView = getLayoutInflater().inflate(
 						android.R.layout.simple_list_item_2, null);
+				((TextView) convertView.findViewById(android.R.id.text1))
+						.setTextColor(getResources().getColor(
+								android.R.color.black));
+				((TextView) convertView.findViewById(android.R.id.text2))
+						.setTextColor(getResources().getColor(
+								android.R.color.black));
 			}
 
 			Talk talk = (Talk) getItem(position);

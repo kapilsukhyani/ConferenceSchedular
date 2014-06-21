@@ -26,4 +26,11 @@ public class Session {
 	public List<Talk> getTalks() {
 		return talks;
 	}
+
+	@Override
+	public String toString() {
+		return "{ " + talks.toString() + " session start time: "
+				+ sessionStartTime + ",session duration:  "
+				+ sessionDurationInMins + " }";
+	}
 }

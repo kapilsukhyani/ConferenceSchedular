@@ -2,6 +2,7 @@ package com.enlighten.conferencescheduler;
 
 import java.util.List;
 
+import com.enlighten.conferencescheduler.models.Conference;
 import com.enlighten.conferencescheduler.models.Talk;
 
 public abstract class Scheduler {
@@ -12,6 +13,6 @@ public abstract class Scheduler {
 		this.trackRule = rule;
 	}
 
-	public abstract void scheduleTalks(List<Talk> talks);
+	public abstract Conference scheduleTalks(List<Talk> talks);
 
 }

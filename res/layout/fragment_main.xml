@@ -22,6 +22,7 @@
             android:ellipsize="end"
             android:hint="@string/talk_title_hint"
             android:lines="3"
+            android:textColor="@android:color/black"
             android:textSize="16sp" />
 
         <LinearLayout
@@ -37,12 +38,13 @@
             <EditText
                 android:id="@+id/talk_duration"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="45dp"
                 android:layout_weight="0.5"
                 android:ellipsize="end"
                 android:hint="@string/talk_duration_hint"
                 android:inputType="number"
                 android:lines="1"
+                android:textColor="@android:color/black"
                 android:textSize="16sp" />
 
             <Spinner

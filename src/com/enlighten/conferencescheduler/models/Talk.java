@@ -21,8 +21,14 @@ public class Talk {
 	public void setTalkStartTime(double talkStartTime) {
 		this.talkStartTime = talkStartTime;
 	}
-	
+
 	public String getTalkTitle() {
 		return talkTitle;
+	}
+
+	@Override
+	public String toString() {
+		return "{ " + " start time: " + talkStartTime + ",talk duration: "
+				+ talkDurationInMins + ",talk title: " + talkTitle + " }";
 	}
 }
