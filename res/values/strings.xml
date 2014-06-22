@@ -22,5 +22,9 @@
         <item>Min</item>
         <item>Lig</item>
     </string-array>
+    
+    
+    <!-- Conference Activity -->
+    <string name="conference_title">Conference Details</string>
 
 </resources>

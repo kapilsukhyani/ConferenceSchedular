@@ -9,6 +9,7 @@ import org.json.JSONObject;
 
 import android.app.ListActivity;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -130,6 +131,11 @@ public class SchedulerActivity extends ListActivity implements OnClickListener {
 
 		protected void onPostExecute(Conference result) {
 			dialog.dismiss();
+			((ConferenceSchedulerApplication) getApplication())
+					.setConference(result);
+			Intent conferenceIntent = new Intent(SchedulerActivity.this,
+					ConferenceActivity.class);
+			startActivity(conferenceIntent);
 
 			System.out.println("result " + result.toString());
 		};

@@ -1,8 +1,10 @@
 package com.enlighten.conferencescheduler.models;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Conference {
+public class Conference implements Serializable {
+	private static final long serialVersionUID = 1L;
 	private List<Track> tracks;
 	private double conferenceDurationInMins;
 	private double conferenceStartTime;
@@ -32,4 +34,5 @@ public class Conference {
 				+ conferenceStartTime + ",conference duration: "
 				+ conferenceDurationInMins + " }";
 	}
+
 }
