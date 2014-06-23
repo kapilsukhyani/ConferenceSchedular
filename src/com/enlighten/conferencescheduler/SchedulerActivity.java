@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -24,7 +25,6 @@ import android.widget.TextView;
 
 import com.enlighten.conferenceschedular.R;
 import com.enlighten.conferencescheduler.SchedulerFactory.SchedulerType;
-import com.enlighten.conferencescheduler.TrackRule.BreakRule;
 import com.enlighten.conferencescheduler.TrackRule.SessionRule;
 import com.enlighten.conferencescheduler.models.Conference;
 import com.enlighten.conferencescheduler.models.Talk;
@@ -69,29 +69,17 @@ public class SchedulerActivity extends ListActivity implements OnClickListener {
 					sessionRule = new SessionRule(
 							sessionRuleJsonObject.getDouble("startTime"),
 							sessionRuleJsonObject.getDouble("minEndTime"),
-							sessionRuleJsonObject.getDouble("maxEndTime"));
+							sessionRuleJsonObject.getDouble("maxEndTime"),
+							sessionRuleJsonObject.getBoolean("break"));
 					sessionRules.add(sessionRule);
 
 				}
 
-				JSONArray breaksJsonArray = trackRuleJsonObject
-						.getJSONArray("breaks");
-				List<BreakRule> breakRules = new ArrayList<TrackRule.BreakRule>();
-				BreakRule breakRule;
-				JSONObject breakRuleJsonObject;
-				for (int i = 0; i < breaksJsonArray.length(); i++) {
-					breakRuleJsonObject = breaksJsonArray.getJSONObject(i);
-
-					breakRule = new BreakRule(
-							breakRuleJsonObject.getDouble("startTime"),
-							breakRuleJsonObject.getDouble("endTime"));
-					breakRules.add(breakRule);
-
-				}
-
-				TrackRule trackRule = new TrackRule(sessionRules, breakRules,
+				TrackRule trackRule = new TrackRule(sessionRules,
 						trackRuleJsonObject.getDouble("trackStartTime"),
-						trackRuleJsonObject.getDouble("trackMaxDuration"));
+						trackRuleJsonObject.getDouble("trackMaxDuration"),
+						trackRuleJsonObject.getDouble("maxTalkDuration"),
+						trackRuleJsonObject.getInt("noOfBreaks"));
 
 				return trackRule;
 
@@ -137,7 +125,8 @@ public class SchedulerActivity extends ListActivity implements OnClickListener {
 					ConferenceActivity.class);
 			startActivity(conferenceIntent);
 
-			System.out.println("result " + result.toString());
+			Log.d("ConferenceScheduler",
+					"Schdeuled conference: " + result.toString());
 		};
 
 		@Override
@@ -235,6 +224,7 @@ public class SchedulerActivity extends ListActivity implements OnClickListener {
 		} else {
 			try {
 				int talkDurationInt = Integer.valueOf(talkDuration);
+
 				// convert talk duration to mins if lightning as a unit is
 				// selected
 				if (unit.equalsIgnoreCase(getResources().getStringArray(
@@ -242,11 +232,19 @@ public class SchedulerActivity extends ListActivity implements OnClickListener {
 					talkDurationInt *= Constants.LIGHTNING_TO_MINUTE_MULTIPLIER;
 				}
 
-				Talk talk = new Talk(talkDurationInt, talkTitle);
-				addedTalks.add(talk);
-				((TalkListAdapter) getListView().getAdapter())
-						.notifyDataSetChanged();
-				resetTalkParamViews();
+				// Talk duration cannot be more that max session duration in a
+				// track
+				if (((double) talkDurationInt / 60) > trackRule
+						.getMaxTalkDuration()) {
+					talkDurationText.setError("Max talk duration is "
+							+ trackRule.getMaxTalkDuration() * 60 + "mins");
+				} else {
+					Talk talk = new Talk(talkDurationInt, talkTitle);
+					addedTalks.add(talk);
+					((TalkListAdapter) getListView().getAdapter())
+							.notifyDataSetChanged();
+					resetTalkParamViews();
+				}
 
 			} catch (NumberFormatException e) {
 				e.printStackTrace();

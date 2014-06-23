@@ -117,13 +117,18 @@ public class ConferenceActivity extends FragmentActivity {
 						.findViewById(android.R.id.text2);
 				double startTime = talk.getTalkStartTime();
 				double duration = talk.getTalkDurationInMins();
-				talkDetails.setText("Start Time: " + startTime + ", Duration: "
-						+ duration);
+				talkDetails.setText("Start Time: " + startTime + "hrs"
+						+ ", Duration: " + duration + "mins");
 				return convertView;
 			}
 
 			@Override
 			public int getChildrenCount(int groupPosition) {
+				Session session = track.getSessions().get(groupPosition);
+				// there will be no talks in breaks
+				if (session.isConferenceBreak()) {
+					return 0;
+				}
 				return track.getSessions().get(groupPosition).getTalks().size();
 			}
 
@@ -156,18 +161,23 @@ public class ConferenceActivity extends FragmentActivity {
 					((TextView) convertView.findViewById(android.R.id.text2))
 							.setTextColor(blackColor);
 				}
-
+				Session session = (Session) getGroup(groupPosition);
 				TextView sessionTitle = (TextView) convertView
 						.findViewById(android.R.id.text1);
-				sessionTitle.setText("Session_" + groupPosition);
+
+				if (session.isConferenceBreak()) {
+					sessionTitle.setText("Break");
+				} else {
+					sessionTitle.setText("Session_" + groupPosition);
+				}
 				TextView sessionDetails = (TextView) convertView
 						.findViewById(android.R.id.text2);
-				Session session = (Session) getGroup(groupPosition);
+
 				double startTime = session.getSessionStartTime();
 				double endTime = startTime
 						+ (session.getSessionDurationInMins() / 60);
-				sessionDetails.setText("Start Time: " + startTime
-						+ ", End Time: " + endTime);
+				sessionDetails.setText("Start Time: " + startTime + "hrs"
+						+ ", End Time: " + endTime + "hrs");
 				return convertView;
 			}
 

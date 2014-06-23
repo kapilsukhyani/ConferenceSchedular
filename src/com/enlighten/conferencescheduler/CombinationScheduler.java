@@ -41,79 +41,92 @@ class CombinationScheduler extends Scheduler {
 			double maxSessionDuration = (sessionRule.getMaxEndTime() - sessionRule
 					.getStartTime()) * Constants.HOUR_TO_MIN_MULTIPLIER;
 			double sessionDurationInMin = maxSessionDuration;
+			// do not schedule any talks for break sessions
+			if (sessionRule.isConferenceBreak()) {
+				scheduledSessions.add(new Session(null, sessionDurationInMin,
+						sessionRule.getStartTime(), true));
+			} else {
 
-			// if all talks can be covered in minSessionDurationInMins
-			if (calculateTalksDuration(talks) <= minSessionDurationInMins) {
-				sessionDurationInMin = minSessionDurationInMins;
+				// if all talks can be covered in minSessionDurationInMins
+				if (calculateTalksDuration(talks) <= minSessionDurationInMins) {
+					sessionDurationInMin = minSessionDurationInMins;
 
-			}
+				}
 
-			// session duration left after assigning a combination of talks to
-			// it
-			double minSessionDurationLeft = sessionDurationInMin;
-			// index array of talks which can most optimally be fit in a session
-			int[] optimumTalksIndexArray = null;
+				// session duration left after assigning a combination of talks
+				// to
+				// it
+				double minSessionDurationLeft = sessionDurationInMin;
+				// index array of talks which can most optimally be fit in a
+				// session
+				int[] optimumTalksIndexArray = null;
 
-			int[] indexArray = new int[talks.size()];
-			for (int i = 0; i < talks.size(); i++) {
-				indexArray[i] = i;
-			}
+				int[] indexArray = new int[talks.size()];
+				for (int i = 0; i < talks.size(); i++) {
+					indexArray[i] = i;
+				}
 
-			// flag indication the best case, when session is completely
-			// occupied by a combination of talks
-			boolean optimumTalksIndexArrayFound = false;
+				// flag indication the best case, when session is completely
+				// occupied by a combination of talks
+				boolean optimumTalksIndexArrayFound = false;
 
-			// select all combination of talks from 1..talks.size() and check
-			// which combiantion of talk fit best in a session
-			for (int selectedNoOfItems = 1; selectedNoOfItems <= talks.size(); selectedNoOfItems++) {
+				// select all combination of talks from 1..talks.size() and
+				// check
+				// which combiantion of talk fit best in a session
+				for (int selectedNoOfItems = 1; selectedNoOfItems <= talks
+						.size(); selectedNoOfItems++) {
 
-				List<int[]> indexCombinations = Utils.combinations(
-						indexArray.length, selectedNoOfItems, indexArray, 0);
+					List<int[]> indexCombinations = Utils
+							.combinations(indexArray.length, selectedNoOfItems,
+									indexArray, 0);
 
-				for (int[] combination : indexCombinations) {
-					// total duration of a combination of talks
-					double talkCombinationDuration = calculateTalksDuration(
-							talks, combination);
+					for (int[] combination : indexCombinations) {
+						// total duration of a combination of talks
+						double talkCombinationDuration = calculateTalksDuration(
+								talks, combination);
 
-					// record the combination if it is more optimum for this
-					// session
-					if (talkCombinationDuration <= sessionDurationInMin
-							&& (sessionDurationInMin - talkCombinationDuration) < minSessionDurationLeft) {
-						optimumTalksIndexArray = combination;
-						minSessionDurationLeft = sessionDurationInMin
-								- talkCombinationDuration;
-						// break loop if most optimum combination of talks if
-						// found
-						if (minSessionDurationLeft == 0) {
-							optimumTalksIndexArrayFound = true;
-							break;
+						// record the combination if it is more optimum for this
+						// session
+						if (talkCombinationDuration <= sessionDurationInMin
+								&& (sessionDurationInMin - talkCombinationDuration) < minSessionDurationLeft) {
+							optimumTalksIndexArray = combination;
+							minSessionDurationLeft = sessionDurationInMin
+									- talkCombinationDuration;
+							// break loop if most optimum combination of talks
+							// if
+							// found
+							if (minSessionDurationLeft == 0) {
+								optimumTalksIndexArrayFound = true;
+								break;
+							}
 						}
+					}
+
+					// stop finding combinations of larger sub group of tasks if
+					// optimum solution is already found
+					if (optimumTalksIndexArrayFound) {
+						break;
 					}
 				}
 
-				// stop finding combinations of larger sub group of tasks if
-				// optimum solution is already found
-				if (optimumTalksIndexArrayFound) {
-					break;
+				// It may happen that there is no talk with duration less than
+				// equal
+				// to the session defined by current session rule
+				if (null != optimumTalksIndexArray) {
+					List<Talk> scheduledTalks = new ArrayList<Talk>(
+							optimumTalksIndexArray.length);
+					for (int index = 0; index < optimumTalksIndexArray.length; index++) {
+						scheduledTalks.add(talks
+								.get(optimumTalksIndexArray[index]));
+					}
+					// removes the scheduled talks
+					talks.removeAll(scheduledTalks);
+
+					scheduledSessions.add(new Session(scheduledTalks,
+							sessionDurationInMin, sessionRule.getStartTime(),
+							false));
 				}
 			}
-
-			// It may happen that there is no talk with duration less than equal
-			// to the session defined by current session rule
-			if (null != optimumTalksIndexArray) {
-				List<Talk> scheduledTalks = new ArrayList<Talk>(
-						optimumTalksIndexArray.length);
-				for (int index = 0; index < optimumTalksIndexArray.length; index++) {
-					scheduledTalks
-							.add(talks.get(optimumTalksIndexArray[index]));
-				}
-				// removes the scheduled talks
-				talks.removeAll(scheduledTalks);
-
-				scheduledSessions.add(new Session(scheduledTalks,
-						sessionDurationInMin, sessionRule.getStartTime()));
-			}
-
 			if (sessionRuleIndex < sessionRules.size() - 1) {
 				sessionRuleIndex++;
 			} else {
@@ -123,12 +136,40 @@ class CombinationScheduler extends Scheduler {
 		}
 
 		List<Track> tracks = getTracks(scheduledSessions);
+		setTalkStartTimesInscheduledTracks(tracks);
 		Conference conference = new Conference(tracks,
 				trackRule.getTrackMaxDuration()
 						* Constants.HOUR_TO_MIN_MULTIPLIER,
 				trackRule.getTrackStartTime());
 
 		return conference;
+	}
+
+	/**
+	 * Sets talk times of all the talks in all the session
+	 * 
+	 * @param tracks
+	 */
+	private void setTalkStartTimesInscheduledTracks(List<Track> tracks) {
+
+		for (Track track : tracks) {
+
+			List<Session> sessions = track.getSessions();
+			for (Session session : sessions) {
+				if (session.isConferenceBreak()) {
+					continue;
+				}
+				double initialStartTime = session.getSessionStartTime();
+				List<Talk> talks = session.getTalks();
+				for (Talk talk : talks) {
+					talk.setTalkStartTime(initialStartTime);
+					initialStartTime += (talk.getTalkDurationInMins() / 60);
+
+				}
+
+			}
+		}
+
 	}
 
 	/**
@@ -141,16 +182,37 @@ class CombinationScheduler extends Scheduler {
 		List<Session> sessionListCopy = new ArrayList<Session>(sessions);
 		List<Track> tracks = new ArrayList<Track>();
 		int maxNoOfSessionsInTrack = trackRule.getSessions().size();
+		int maxNoOfBreaksInTrack = trackRule.getNoOfBreaks();
 		List<Session> sessionsInTrack;
-		while (!sessionListCopy.isEmpty()) {
 
+		while (!sessionListCopy.isEmpty()) {
+			double scheduledTrackDuration = 0;
+			int noOfBreaksScheduled = 0;
 			sessionsInTrack = new ArrayList<Session>();
 			for (int sessionIndex = 0; sessionIndex < maxNoOfSessionsInTrack; sessionIndex++) {
 				if (sessionListCopy.isEmpty()) {
 					break;
 				} else {
-					sessionsInTrack.add(sessionListCopy.get(0));
-					sessionListCopy.remove(0);
+					Session session = sessionListCopy.get(0);
+					if (session.isConferenceBreak()
+							&& noOfBreaksScheduled == maxNoOfBreaksInTrack) {
+						continue;
+					}
+					// schedule the session in current track only if session can
+					// be incorporated in the left duration
+					if (scheduledTrackDuration
+							+ session.getSessionDurationInMins() <= trackRule
+							.getTrackMaxDuration() * 60) {
+						if (session.isConferenceBreak()) {
+							noOfBreaksScheduled++;
+						}
+						scheduledTrackDuration += session
+								.getSessionDurationInMins();
+						sessionsInTrack.add(session);
+						sessionListCopy.remove(session);
+					} else {
+						break;
+					}
 				}
 			}
 			tracks.add(new Track(sessionsInTrack));

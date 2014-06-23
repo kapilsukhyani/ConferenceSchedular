@@ -25,6 +25,6 @@
     
     
     <!-- Conference Activity -->
-    <string name="conference_title">Conference Details</string>
+    <string name="conference_title">Conference Details\nSwipe left or right to see other tracks</string>
 
 </resources>

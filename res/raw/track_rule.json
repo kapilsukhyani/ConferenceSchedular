@@ -1,22 +1,26 @@
 {
    "trackStartTime":9.0,
    "trackMaxDuration":8.0,
+   "maxTalkDuration":4.0,
+   "noOfBreaks":1,
    "sessions":[
       {
+      "break":false,
          "startTime":9.0,
          "minEndTime":12.0,
          "maxEndTime":12.0
       },
       {
+      "break":true,
+         "startTime":12.0,
+         "minEndTime":13.0,
+         "maxEndTime":13.0
+      },
+      {
+      "break":false,
          "startTime":13.0,
          "minEndTime":16.0,
          "maxEndTime":17.0
-      }
-   ],
-   "breaks":[
-      {
-         "startTime":12.0,
-         "endTime":13.0
       }
    ]
 }
